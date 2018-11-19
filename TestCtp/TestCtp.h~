@@ -1,0 +1,18 @@
+#ifndef TESTCTP_H
+#define TESTCTP_H
+
+enum{
+  LOG_INITIALIZED = 1,
+  LOG_ROOT = 2,
+  LOG_NOT_ROOT = 3,
+  LOG_FINISH = 4,
+  COLLECTION_ID = 0xee,
+};
+
+
+
+
+
+
+#endif
+
