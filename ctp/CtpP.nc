@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The Regents of the University  of California.  
+ * Copyright (c) 2005 The Regents of the University  of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,7 +89,7 @@ configuration CtpP {
     interface CtpInfo;
     interface LinkEstimator;
     interface CtpCongestion;
-    interface RootControl; 
+    interface RootControl;
     interface UnicastNameFreeRouting;
   }
 
@@ -111,7 +111,7 @@ implementation {
   //components ActiveMessageC;
   components new CtpForwardingEngineP() as Forwarder;
   components MainC, LedsC;
-  
+
   Send = Forwarder;
   StdControl = Forwarder;
   Receive = Forwarder.Receive;
@@ -122,7 +122,7 @@ implementation {
   CollectionPacket = Forwarder;
   CtpPacket = Forwarder;
   CtpCongestion = Forwarder;
-  
+
   components new PoolC(message_t, FORWARD_COUNT) as MessagePoolP;
   components new PoolC(fe_queue_entry_t, FORWARD_COUNT) as QEntryPoolP;
   Forwarder.QEntryPool -> QEntryPoolP;
@@ -160,7 +160,7 @@ implementation {
   StdControl = Estimator1;
   RootControl = Router;
   UnicastNameFreeRouting = Router;
-  
+
   MainC.SoftwareInit -> Router;
   Router.BeaconSend1 -> Estimator1.Send;
   Router.BeaconSend2 -> Estimator2.Send;
@@ -186,7 +186,7 @@ implementation {
   CtpInfo = Router;
 
   Router.SerialLogger -> SerialLoggerC;
-  
+
   components new TimerMilliC() as RetxmitTimer1;
   components new TimerMilliC() as RetxmitTimer2;
   Forwarder.RetxmitTimer1 -> RetxmitTimer1;
@@ -216,18 +216,18 @@ implementation {
   DualRadioControlC.Radio2Control -> RF212ActiveMessageC;
   Forwarder.RadiosControl -> DualRadioControlC;
   Router.RadiosControl -> DualRadioControlC;
-  
+
   Forwarder.Radio1Ack -> RF231ActiveMessageC;
   Forwarder.Radio2Ack -> RF212ActiveMessageC;
   Forwarder.AMPacket1 -> RF231ActiveMessageC;
   Forwarder.AMPacket2 -> RF212ActiveMessageC;
   Forwarder.Leds -> LedsC;
-  
+
   //components new AMSenderC(AM_CTP_ROUTING) as SendControl;
   //components new AMReceiverC(AM_CTP_ROUTING) as ReceiveControl;
 
   LinkEstimator = Estimator1;
-  
+
   Estimator1.Random -> RandomC;
 
   Estimator1.AMSend -> RF231ActiveMessageC.AMSend[AM_CTP_ROUTING];
