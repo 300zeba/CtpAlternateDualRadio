@@ -358,7 +358,7 @@ implementation {
               dbg("TreeRouting", "   did not pass threshold.\n");
               continue;
             }
-            call SerialLogger.log(LOG_ETX_1,pathEtx);
+           // call SerialLogger.log(LOG_ETX_1,pathEtx);
             
             if (pathEtx < minEtx1) {
 	      dbg("TreeRouting", "   best is %d, setting to %d\n", pathEtx, entry->neighbor);
@@ -400,7 +400,7 @@ implementation {
               dbg("TreeRouting", "   did not pass threshold.\n");
               continue;
             }
-            call SerialLogger.log(LOG_ETX_2,pathEtx);
+            //call SerialLogger.log(LOG_ETX_2,pathEtx);
             
             if (pathEtx < minEtx2) {
           dbg("TreeRouting", "   best is %d, setting to %d\n", pathEtx, entry->neighbor);
@@ -408,8 +408,8 @@ implementation {
                 best2 = entry;
             }  
         }
-        call SerialLogger.log(LOG_MIN_ETX_1,minEtx1);
-        call SerialLogger.log(LOG_MIN_ETX_2,minEtx2);
+        //call SerialLogger.log(LOG_MIN_ETX_1,minEtx1);
+        //call SerialLogger.log(LOG_MIN_ETX_2,minEtx2);
         if(minEtx1 < minEtx2){
             minEtx = minEtx1;
             c_radio = 1;
@@ -455,8 +455,8 @@ implementation {
                 call LinkEstimator2.pinNeighbor(best->neighbor);
                 call LinkEstimator2.clearDLQ(best->neighbor);
 
-                call SerialLogger.log(LOG_DAD_CHANGE,routeInfo.parent);
-                call SerialLogger.log(LOG_CURRENT_DAD,best->neighbor);
+               // call SerialLogger.log(LOG_DAD_CHANGE,routeInfo.parent);
+               // call SerialLogger.log(LOG_CURRENT_DAD,best->neighbor);
 
 		routeInfo.parent = best->neighbor;
 		routeInfo.etx = best->info.etx;
@@ -610,8 +610,8 @@ implementation {
         from = call AMPacket1.source(msg);
         rcvBeacon = (ctp_routing_header_t*)payload;
 
-        call SerialLogger.log(LOG_RECEIVED_BEACON,1);
-        call SerialLogger.log(LOG_FROM,from);
+        //call SerialLogger.log(LOG_RECEIVED_BEACON,1);
+        //call SerialLogger.log(LOG_FROM,from);
 
         congested = call CtpRoutingPacket.getOption(msg, CTP_OPT_ECN);
 
@@ -655,11 +655,11 @@ implementation {
               
           return msg;
         }
-        call SerialLogger.log(LOG_RECEIVED_BEACON,2);
+        //call SerialLogger.log(LOG_RECEIVED_BEACON,2);
         //need to get the am_addr_t of the source
         from = call AMPacket2.source(msg);
         rcvBeacon = (ctp_routing_header_t*)payload;
-        call SerialLogger.log(LOG_FROM,from);
+       // call SerialLogger.log(LOG_FROM,from);
 
         congested = call CtpRoutingPacket.getOption(msg, CTP_OPT_ECN);
 

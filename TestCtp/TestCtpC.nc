@@ -1,7 +1,7 @@
 #define INIT_TIME 5000
-#define FINISH_TIME 60000
+#define FINISH_TIME 1080000
 
-#define NUM_MSGS 10
+#define NUM_MSGS 1000
 #define SEND_PERIOD 1000
 #define SEND_DELAY 5000
 
@@ -43,7 +43,7 @@ implementation {
 
   void initializeNode() {
 
-    if (TOS_NODE_ID == 6 || TOS_NODE_ID == 17 || TOS_NODE_ID == 25 || TOS_NODE_ID == 36) {
+    if (TOS_NODE_ID == 6 || TOS_NODE_ID == 17 || TOS_NODE_ID == 25 || TOS_NODE_ID == 36 || TOS_NODE_ID == 51 || TOS_NODE_ID == 79) {
       call RootControl.setRoot();
       call SerialLogger.log(LOG_ROOT, TOS_NODE_ID);
       call FinishTimer.startOneShot(FINISH_TIME);
