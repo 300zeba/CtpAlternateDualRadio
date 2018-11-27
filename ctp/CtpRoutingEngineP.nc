@@ -141,6 +141,7 @@ generic module CtpRoutingEngineP(uint8_t routingTableSize, uint32_t minInterval,
 implementation {
 
     uint8_t radio = 1; //Which radio to use
+    uint32_t beaconCount = 0;
 
     bool ECNOff = TRUE;
 
@@ -464,6 +465,7 @@ implementation {
 		if (currentEtx - minEtx > 20 || radio != c_radio) {
 		  call CtpInfo.triggerRouteUpdate();
 		}
+        
         radio = c_radio;
         call SerialLogger.log(LOG_UPDATE_RADIO_TO,radio);
             }
@@ -539,6 +541,7 @@ implementation {
             updateRadio();
         }
         if (eval == SUCCESS) {
+            beaconCount++;
             call SerialLogger.log(LOG_SENT_BEACON,radio);
             sending = TRUE;
         } else if (eval == EOFF) {
@@ -1138,6 +1141,9 @@ implementation {
     }
     command am_addr_t CtpInfo.getNeighborAddr(uint8_t n) {
       return (n < routingTableActive1)? routingTable1[n].neighbor:AM_BROADCAST_ADDR;
+    }
+    command uint32_t CtpInfo.totalBeacons() {
+      return beaconCount;
     }
     
 } 

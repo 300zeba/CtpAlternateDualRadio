@@ -1,7 +1,7 @@
 #define INIT_TIME 5000
-#define FINISH_TIME 1080000
+#define FINISH_TIME 240000
 
-#define NUM_MSGS 1000
+#define NUM_MSGS 100
 #define SEND_PERIOD 1000
 #define SEND_DELAY 5000
 
@@ -22,6 +22,7 @@ module TestCtpC {
 
     interface RootControl;
     interface CtpInfo;
+    interface CtpInfoForward;
     interface CollectionPacket;
     interface Receive;
     interface Intercept;
@@ -39,6 +40,8 @@ implementation {
   uint16_t sendCount = 0;
   uint16_t receivedCount = 0;
   message_t msgBuffer;
+  uint32_t startTime = 0;
+  uint32_t endTime = 0;
 
 
   void initializeNode() {
@@ -132,6 +135,11 @@ implementation {
 	event void Send.sendDone(message_t *msg, error_t error) {}
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len) {
+    if (startTime == 0) {
+      startTime = call FinishTimer.getNow();
+    }
+    endTime = call FinishTimer.getNow();
+
     receivedCount++;
     return msg;
   }
@@ -143,11 +151,16 @@ implementation {
     if(call RootControl.isRoot()){
       call SerialLogger.log(LOG_ROOT,TOS_NODE_ID);
       call SerialLogger.log(LOG_RECEIVED_COUNT,receivedCount);
+      call SerialLogger.log(LOG_THROUGHPUT_TIME,endTime - startTime);
     }
     else{
       call SerialLogger.log(LOG_NOT_ROOT,TOS_NODE_ID);
       call SerialLogger.log(LOG_SENT_COUNT,sendCount);
     }
+    call SerialLogger.log(LOG_TOTAL_BEACONS, call CtpInfo.totalBeacons());
+    call SerialLogger.log(LOG_DUPLICATES,call CtpInfoForward.totalDuplicates());
+    call SerialLogger.log(LOG_AVERAGE_THL,call CtpInfoForward.averageTHL());
+    call SerialLogger.log(LOG_MAX_THL,call CtpInfoForward.maxTHL());
 
   }
 

@@ -87,6 +87,7 @@ configuration CtpP {
     interface CtpPacket;
 
     interface CtpInfo;
+    interface CtpInfoForward;
     //interface LinkEstimator;
     interface CtpCongestion;
     interface RootControl; 
@@ -185,6 +186,7 @@ implementation {
   Forwarder.CtpInfo -> Router;
   Router.CtpCongestion -> Forwarder;
   CtpInfo = Router;
+  CtpInfoForward = Forwarder;
 
   Router.SerialLogger -> SerialLoggerC;
   

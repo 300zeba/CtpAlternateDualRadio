@@ -13,6 +13,7 @@ components CollectionC as Ctp;
 App.CtpRouteControl -> Ctp;
 App.RootControl -> Ctp;
 App.CtpInfo -> Ctp;
+App.CtpInfoForward -> Ctp;
 App.Receive -> Ctp.Receive[COLLECTION_ID];
 App.Intercept -> Ctp.Intercept[COLLECTION_ID];
 

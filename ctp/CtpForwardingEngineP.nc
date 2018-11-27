@@ -116,6 +116,7 @@ generic module CtpForwardingEngineP() {
     interface CollectionPacket;
     interface CtpPacket;
     interface CtpCongestion;
+    interface CtpInfoForward;
   }
   uses {
     // These five interfaces are used in the forwarding path
@@ -199,6 +200,7 @@ implementation {
    * can distinguish retransmissions from different packets. */
   uint8_t seqno;
 
+
   enum {
     CLIENT_COUNT = uniqueCount(UQ_CTP_CLIENT)
   };
@@ -219,6 +221,11 @@ implementation {
      
   message_t loopbackMsg;
   message_t* ONE_NOK loopbackMsgPtr;
+
+  uint16_t duplicates = 0;
+  uint16_t maxTHL = 0;
+  uint32_t sumTHL = 0;
+  uint16_t countTHL = 0;
 
 
   command error_t Init.init() {
@@ -496,6 +503,7 @@ implementation {
 	 * forwarded packets, so we can circumvent the client or
 	 * forwarded branch for freeing the buffer. */
       call CollectionDebug.logEvent(NET_C_FE_DUPLICATE_CACHE_AT_SEND);
+      duplicates++;
       call SendQueue.dequeue();
 	    if (call MessagePool.put(qe->msg) != SUCCESS) 
 	     call CollectionDebug.logEvent(NET_C_FE_PUT_MSGPOOL_ERR); 
@@ -969,7 +977,7 @@ implementation {
     fe_queue_entry_t* qe;
     uint8_t i, thl;
 
-    call SerialLogger.log(LOG_RECEIVED_PACKET,1);
+    //call SerialLogger.log(LOG_RECEIVED_PACKET,1);
     collectid = call CtpPacket.getType(msg);
 
     // Update the THL here, since it has lived another hop, and so
@@ -977,6 +985,12 @@ implementation {
     thl = call CtpPacket.getThl(msg);
     thl++;
     call CtpPacket.setThl(msg, thl);
+
+    sumTHL += thl;
+    if(thl > maxTHL){
+      maxTHL = thl;
+    }
+    countTHL++;
 
     call CollectionDebug.logEventMsg(NET_C_FE_RCV_MSG,
 					 call CollectionPacket.getSequenceNumber(msg), 
@@ -1004,6 +1018,7 @@ implementation {
     }
     
     if (duplicate) {
+        duplicates++;
         call CollectionDebug.logEvent(NET_C_FE_DUPLICATE_QUEUE);
         return msg;
     }
@@ -1044,6 +1059,12 @@ implementation {
     thl++;
     call CtpPacket.setThl(msg, thl);
 
+    sumTHL += thl;
+    if(thl > maxTHL){
+      maxTHL = thl;
+    }
+    countTHL++;
+
     call CollectionDebug.logEventMsg(NET_C_FE_RCV_MSG,
            call CollectionPacket.getSequenceNumber(msg), 
            call CollectionPacket.getOrigin(msg), 
@@ -1071,6 +1092,7 @@ implementation {
     
     if (duplicate) {
         call CollectionDebug.logEvent(NET_C_FE_DUPLICATE_QUEUE);
+        duplicates++;
         return msg;
     }
 
@@ -1271,6 +1293,16 @@ implementation {
   default command error_t CollectionDebug.logEventRoute(uint8_t type, am_addr_t parent, uint8_t hopcount, uint16_t metric) {
     return SUCCESS;
   }
+
+  command uint16_t CtpInfoForward.totalDuplicates(){
+    return duplicates;
+  }
    
+  command uint16_t CtpInfoForward.maxTHL(){
+    return maxTHL;
+  }
+  command uint32_t CtpInfoForward.averageTHL(){
+    return sumTHL/countTHL;
+  }
 }
 
