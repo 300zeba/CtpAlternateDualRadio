@@ -16,6 +16,7 @@ App.CtpInfo -> Ctp;
 App.CtpInfoForward -> Ctp;
 App.Receive -> Ctp.Receive[COLLECTION_ID];
 App.Intercept -> Ctp.Intercept[COLLECTION_ID];
+App.CollectionPacket -> Ctp.CollectionPacket;
 
 components new CollectionSenderC(COLLECTION_ID);
 App.Send -> CollectionSenderC;
@@ -41,7 +42,8 @@ DualRadioControlC.Radio1Control -> RF231ActiveMessageC;
 DualRadioControlC.Radio2Control -> RF212ActiveMessageC;
 App.RadiosControl -> DualRadioControlC;
 
-
+components new LruCtpMsgCacheC(16) as ReceivedCacheP;
+App.ReceivedCache -> ReceivedCacheP;
 
 }
 

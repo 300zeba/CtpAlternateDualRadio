@@ -28,6 +28,8 @@ module TestCtpC {
     interface Intercept;
     interface Send;
 
+    interface Cache<message_t*> as ReceivedCache;
+
   }
 
 }
@@ -42,6 +44,7 @@ implementation {
   message_t msgBuffer;
   uint32_t startTime = 0;
   uint32_t endTime = 0;
+  uint16_t duplicate = 0;
 
 
   void initializeNode() {
@@ -135,12 +138,20 @@ implementation {
 	event void Send.sendDone(message_t *msg, error_t error) {}
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len) {
+
     if (startTime == 0) {
       startTime = call FinishTimer.getNow();
     }
     endTime = call FinishTimer.getNow();
 
-    receivedCount++;
+    if(call ReceivedCache.lookup(msg)){
+      call SerialLogger.log(LOG_DUPLICATE_AT_ROOT,1);
+      duplicate ++;
+    }
+    else{
+      call ReceivedCache.insert(msg);
+      receivedCount++;
+    }
     return msg;
   }
 	
@@ -158,9 +169,10 @@ implementation {
       call SerialLogger.log(LOG_SENT_COUNT,sendCount);
     }
     call SerialLogger.log(LOG_TOTAL_BEACONS, call CtpInfo.totalBeacons());
-    call SerialLogger.log(LOG_DUPLICATES,call CtpInfoForward.totalDuplicates());
+    call SerialLogger.log(LOG_DUPLICATES,call CtpInfoForward.totalDuplicates() + duplicate);
     call SerialLogger.log(LOG_AVERAGE_THL,call CtpInfoForward.averageTHL());
     call SerialLogger.log(LOG_MAX_THL,call CtpInfoForward.maxTHL());
+    call SerialLogger.log(LOG_TOTAL_MESSAGES, call CtpInfoForward.totalMsgs());
 
   }
 

@@ -226,6 +226,7 @@ implementation {
   uint16_t maxTHL = 0;
   uint32_t sumTHL = 0;
   uint16_t countTHL = 0;
+  uint16_t send_total = 0;
 
 
   command error_t Init.init() {
@@ -559,6 +560,7 @@ implementation {
            setState(SENDING1);
            call SerialLogger.log(LOG_SEND_SUCCESS,1);
            dbg("Forwarder", "%s: subsend succeeded with %p.\n", __FUNCTION__, qe->msg);
+           send_total ++;
   	       return;
   	     }
   	     // The packet is too big: truncate it and retry.
@@ -619,6 +621,7 @@ implementation {
            setState(SENDING2);
            call SerialLogger.log(LOG_SEND_SUCCESS,2);
            dbg("Forwarder", "%s: subsend succeeded with %p.\n", __FUNCTION__, qe->msg);
+           send_total ++;
            return;
          }
          // The packet is too big: truncate it and retry.
@@ -1296,13 +1299,17 @@ implementation {
 
   command uint16_t CtpInfoForward.totalDuplicates(){
     return duplicates;
-  }
+   }
    
   command uint16_t CtpInfoForward.maxTHL(){
     return maxTHL;
   }
   command uint32_t CtpInfoForward.averageTHL(){
     return sumTHL/countTHL;
+  }
+
+  command uint16_t CtpInfoForward.totalMsgs(){
+    return send_total;
   }
 }
 

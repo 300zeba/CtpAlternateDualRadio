@@ -53,7 +53,7 @@ configuration CollectionC {
     interface Packet;
     interface CollectionPacket;
     interface CtpPacket;
-
+    interface CtpInfoForward;
     interface CtpInfo;
     interface CtpCongestion;
     interface RootControl;
@@ -80,6 +80,7 @@ implementation {
   CtpPacket = CtpP;
 
   CtpInfo = CtpP;
+  CtpInfoForward = CtpP;
   CtpCongestion = CtpP;
   RootControl = CtpP;
   UnicastNameFreeRouting = CtpP;
