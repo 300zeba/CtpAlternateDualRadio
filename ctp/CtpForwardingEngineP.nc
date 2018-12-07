@@ -326,17 +326,14 @@ implementation {
   command error_t Send.send[uint8_t client](message_t* msg, uint8_t len) {
     ctp_data_header_t* hdr;
     fe_queue_entry_t *qe;
-    uint8_t radioU = call CtpInfo.current_radio();
-    call SerialLogger.log(LOG_SEND_RADIO,radioU);
-    if(radioU == 1){
-      call SerialLogger.log(LOG_SET_RADIO_BIT,1);
+
       dbg("Forwarder", "%s: sending packet from client %hhu: %x, len %hhu\n", __FUNCTION__, client, msg, len);
       if (!hasState(ROUTING_ON)) {
-        call SerialLogger.log(LOG_ROUTING_OFF,1);
+        call SerialLogger.log(LOG_ROUTING_OFF,0);
         return EOFF;
       }
       if (len > call Send.maxPayloadLength[client]()) {
-        call SerialLogger.log(LOG_PACKET_TOO_BIG,1);
+        call SerialLogger.log(LOG_PACKET_TOO_BIG,0);
         return ESIZE;
       }
     
@@ -348,7 +345,7 @@ implementation {
       hdr->thl = 0;
       if (clientPtrs[client] == NULL) {
         dbg("Forwarder", "%s: send failed as client is busy.\n", __FUNCTION__);
-        call SerialLogger.log(LOG_EBUSY,1);
+        call SerialLogger.log(LOG_EBUSY,0);
         return EBUSY;
       }
       qe = clientPtrs[client];
@@ -357,64 +354,12 @@ implementation {
       qe->retries = MAX_RETRIES;
       dbg("Forwarder", "%s: queue entry for %hhu is %hhu deep\n", __FUNCTION__, client, call SendQueue.size());
       if (call SendQueue.enqueue(qe) == SUCCESS) {
-       if (hasState(RADIO_ON) && !hasState(SENDING1)) {
-	        dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
-          post sendTask();
-          call SerialLogger.log(LOG_POST_TASK,1);
-       }
-       clientPtrs[client] = NULL;
-        return SUCCESS;
-      }
-     else {
-        dbg("Forwarder", 
-           "%s: send failed as packet could not be enqueued.\n", 
-           __FUNCTION__);
-      
-       // send a debug message to the uart
-        call CollectionDebug.logEvent(NET_C_FE_SEND_QUEUE_FULL);
-
-       // Return the pool entry, as it's not for me...
-       return FAIL;
-     }
-   }
-     else{
-      call SerialLogger.log(LOG_SET_RADIO_BIT,2);
-      dbg("Forwarder", "%s: sending packet from client %hhu: %x, len %hhu\n", __FUNCTION__, client, msg, len);
-      if (!hasState(ROUTING_ON)) {
-        call SerialLogger.log(LOG_ROUTING_OFF,2);
-        return EOFF;
-      }
-      
-      if (len > call Send.maxPayloadLength[client]()) {
-        call SerialLogger.log(LOG_PACKET_TOO_BIG,2);
-        return ESIZE;
-      }
-      
-      call Packet.setPayloadLength(msg, len);
-      hdr = getHeader(msg);
-      hdr->origin = TOS_NODE_ID;
-      hdr->originSeqNo  = seqno++;
-      hdr->type = call CollectionId.fetch[client]();
-      hdr->thl = 0;
-      if (clientPtrs[client] == NULL) {
-        dbg("Forwarder", "%s: send failed as client is busy.\n", __FUNCTION__);
-        call SerialLogger.log(LOG_EBUSY,2);
-        return EBUSY;
-      }
-
-      qe = clientPtrs[client];
-      qe->msg = msg;
-      qe->client = client;
-      qe->retries = MAX_RETRIES;
-      dbg("Forwarder", "%s: queue entry for %hhu is %hhu deep\n", __FUNCTION__, client, call SendQueue.size());
-      if (call SendQueue.enqueue(qe) == SUCCESS) {
-       if (hasState(RADIO_ON) && !hasState(SENDING2)) {
+       if (hasState(RADIO_ON) && (!hasState(SENDING1) || !hasState(SENDING2))) {
           dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
           post sendTask();
-          call SerialLogger.log(LOG_POST_TASK,2);
+          call SerialLogger.log(LOG_POST_TASK,0);
        }
        clientPtrs[client] = NULL;
-
         return SUCCESS;
       }
      else {
@@ -428,8 +373,9 @@ implementation {
        // Return the pool entry, as it's not for me...
        return FAIL;
      }
-  }
+   
 }
+
 
   command error_t Send.cancel[uint8_t client](message_t* msg) {
     // cancel not implemented. will require being able
